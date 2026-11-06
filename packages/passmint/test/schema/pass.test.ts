@@ -559,6 +559,44 @@ describe('parsePassInput — google.loyalty (storeCard)', () => {
   })
 })
 
+describe('StoreCardSchema — poster', () => {
+  const base = {
+    style: 'storeCard' as const,
+    passTypeIdentifier: 'pass.com.example.card',
+    serialNumber: 'card-1',
+    teamIdentifier: 'ABCD1234EF',
+    organizationName: 'Example',
+    description: 'Stamp card',
+    images: {
+      icon: { x2: { bytes: new Uint8Array([1]) } },
+      artwork: { x2: { bytes: new Uint8Array([2]) } },
+    },
+  }
+
+  it('accepts poster: true with artwork and poster fields', () => {
+    const r = v.safeParse(PassInputSchema, {
+      ...base,
+      poster: true,
+      posterFields: { headerFields: [{ key: 'stamps', value: '6 / 9' }] },
+    })
+    expect(r.success).toBe(true)
+  })
+
+  it('rejects poster: true without artwork', () => {
+    const { artwork, ...images } = base.images
+    const r = v.safeParse(PassInputSchema, { ...base, images, poster: true })
+    expect(r.success).toBe(false)
+  })
+
+  it('rejects posterFields without poster: true', () => {
+    const r = v.safeParse(PassInputSchema, {
+      ...base,
+      posterFields: { headerFields: [{ key: 'stamps', value: 'x' }] },
+    })
+    expect(r.success).toBe(false)
+  })
+})
+
 describe('EventTicketSchema — poster', () => {
   const base = {
     style: 'eventTicket' as const,

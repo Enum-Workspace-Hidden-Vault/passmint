@@ -346,13 +346,30 @@ const GoogleLoyaltySchema = v.object({
 })
 export type GoogleLoyalty = v.InferOutput<typeof GoogleLoyaltySchema>
 
-export const StoreCardSchema = v.object({
-  ...PassBaseSchema.entries,
-  style: v.literal('storeCard'),
-  ...StandardFieldLayout,
-  /** Google Wallet only. See {@link GoogleLoyalty}. */
-  google: v.optional(v.object({ loyalty: v.optional(GoogleLoyaltySchema) })),
-})
+export const StoreCardSchema = v.pipe(
+  v.object({
+    ...PassBaseSchema.entries,
+    style: v.literal('storeCard'),
+    ...StandardFieldLayout,
+    /** Google Wallet only. See {@link GoogleLoyalty}. */
+    google: v.optional(v.object({ loyalty: v.optional(GoogleLoyaltySchema) })),
+    /**
+     * Also emit an iOS 27 `posterGeneric` block beside `storeCard`, which older
+     * iOS keeps showing with its strip. The poster art is `images.artwork`.
+     */
+    poster: v.optional(v.boolean()),
+    /** The poster's own field layout; without it the poster uses header and primary fields. */
+    posterFields: v.optional(PosterFieldsSchema),
+  }),
+  v.check(
+    (input) => !input.poster || input.images.artwork !== undefined,
+    'A poster store card (poster: true) requires images.artwork',
+  ),
+  v.check(
+    (input) => input.poster === true || input.posterFields === undefined,
+    'posterFields requires poster: true',
+  ),
+)
 export type StoreCardInput = v.InferOutput<typeof StoreCardSchema>
 
 export const CouponSchema = v.object({

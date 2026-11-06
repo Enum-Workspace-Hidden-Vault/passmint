@@ -582,3 +582,37 @@ describe('renderApplePass — poster event ticket', () => {
     expect(result.passJson.eventTicket).toBeDefined()
   })
 })
+
+describe('renderApplePass — poster store card', () => {
+  const card = {
+    ...baseInput,
+    style: 'storeCard' as const,
+    images: {
+      icon: { x2: { bytes: ICON } },
+      strip: { x2: { bytes: ICON } },
+      artwork: { x2: { bytes: ICON } },
+    },
+    headerFields: [{ key: 'stamps', value: 'Fallback' }],
+  }
+
+  it('emits posterGeneric beside the storeCard block, keeping the strip', () => {
+    const result = renderApplePass({
+      ...card,
+      poster: true,
+      posterFields: { headerFields: [{ key: 'stamps', value: 'Poster' }] },
+    })
+    const poster = result.passJson.posterGeneric as Record<string, Array<{ value: string }>>
+    const fallback = result.passJson.storeCard as Record<string, Array<{ value: string }>>
+    expect(poster.headerFields?.[0]?.value).toBe('Poster')
+    expect(fallback.headerFields?.[0]?.value).toBe('Fallback')
+    expect(result.passJson.generic).toBeUndefined()
+    expect(result.files['artwork@2x.png']).toBeDefined()
+    expect(result.files['strip@2x.png']).toBeDefined()
+  })
+
+  it('emits only the storeCard block without the poster', () => {
+    const result = renderApplePass(card)
+    expect(result.passJson.posterGeneric).toBeUndefined()
+    expect(result.passJson.storeCard).toBeDefined()
+  })
+})

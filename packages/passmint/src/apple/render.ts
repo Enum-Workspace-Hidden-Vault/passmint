@@ -4,7 +4,7 @@ import type { Field } from '../schema/fields'
 import type { ImageSource, Images, ImageTriple } from '../schema/images'
 import type { LocalizedString } from '../schema/localization'
 import { defaultValue, translations } from '../schema/localization'
-import type { EventTicketInput, GenericPassInput, PassInput } from '../schema/pass'
+import type { EventTicketInput, GenericPassInput, PassInput, StoreCardInput } from '../schema/pass'
 import { encodeStringsFile } from './strings'
 
 /**
@@ -299,7 +299,7 @@ function buildStyleContent(
  * fallback block. When `posterFields` is set, the block is built only from it.
  */
 function buildPosterGenericContent(
-  input: GenericPassInput | EventTicketInput,
+  input: GenericPassInput | EventTicketInput | StoreCardInput,
   collector: TranslationCollector,
 ): Record<string, unknown> {
   const content: Record<string, unknown> = {}
@@ -379,7 +379,10 @@ export function renderApplePass(input: PassInput): AppleRenderedPass {
 
   if (input.featuredActions) passJson.featuredActions = input.featuredActions
 
-  if ((input.style === 'generic' || input.style === 'eventTicket') && input.poster) {
+  if (
+    (input.style === 'generic' || input.style === 'eventTicket' || input.style === 'storeCard') &&
+    input.poster
+  ) {
     // Emit both blocks: posterGeneric for iOS 27+, the style's own block as the iOS 26- fallback.
     passJson[input.style] = buildStyleContent(input, collector)
     passJson.posterGeneric = buildPosterGenericContent(input, collector)

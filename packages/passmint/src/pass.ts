@@ -325,9 +325,9 @@ export class PassBuilder<TInput extends PassInput> {
   }
 
   /**
-   * Add a field to the poster-only layout (`posterFields`) of a generic pass
-   * built with `poster: true`. Once used, the poster is built only from these
-   * fields and the other adders feed only the `generic` fallback.
+   * Add a field to the poster-only layout (`posterFields`) of a generic pass,
+   * event ticket or store card built with `poster: true`. Once used, the poster is
+   * built only from these fields and the other adders feed only the older layout.
    */
   posterField(area: PosterFieldArea, field: Field): this {
     const draft = this.draft as unknown as { posterFields?: Record<string, Field[]> }
